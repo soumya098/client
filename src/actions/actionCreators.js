@@ -1,7 +1,7 @@
 import * as api from "../api";
 import * as actionTypes from "./actionTypes";
 
-//action creators
+//action creators using thunk
 export const getPosts = () => async (dispatch) => {
   try {
     const { data } = await api.fetchPosts();
@@ -43,6 +43,27 @@ export const likePost = (id) => async (dispatch) => {
   try {
     const { data } = await api.likePost(id);
     dispatch({ type: actionTypes.LIKED, payload: data });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+//auth action
+
+export const signUp = (fData, history) => async (dispatch) => {
+  try {
+    const { data } = await api.signUp(fData);
+    dispatch({ type: actionTypes.AUTH, data });
+    history.push("/");
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const signIn = (fData, history) => async (dispatch) => {
+  try {
+    const { data } = await api.signIn(fData);
+    dispatch({ type: actionTypes.AUTH, data });
+    history.push("/");
   } catch (error) {
     console.log(error);
   }

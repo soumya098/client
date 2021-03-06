@@ -18,8 +18,38 @@ import { deletePost, likePost } from "../../../actions/actionCreators";
 function Post({ post, setCurrId }) {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const user = JSON.parse(localStorage.getItem("profile"));
+  console.log(post.creator, user?.result?._id, user?.result?.googleId);
+
+  const Likes = () => {
+    if (post.likes.length > 0) {
+      return post.likes.find(
+        (like) => like === (user?.result?.googleId || user?.result?._id)
+      ) ? (
+        <>
+          <ThumbUpAltIcon fontSize="small" />
+          &nbsp;
+          {post.likes.length > 2
+            ? `you and ${post.likes.length - 1} other`
+            : `${post.likes.length} like${post.likes.length > 1 ? `s` : ``}`}
+        </>
+      ) : (
+        <>
+          <ThumbUpAltIcon fontSize="small" />
+          &nbsp;{post.likes.length} {post.likes.length === 1 ? "like" : "likes"}
+        </>
+      );
+    }
+    return (
+      <>
+        <ThumbUpAltIcon fontSize="small" />
+        &nbsp;Like
+      </>
+    );
+  };
 
   const rendertag = post.tags.map((tag) => `#${tag} `);
+
   return (
     <Card className={classes.card}>
       <CardMedia
@@ -28,20 +58,23 @@ function Post({ post, setCurrId }) {
         title={post.title}
       />
       <div className={classes.overlay}>
-        <Typography variant="h6">{post.creator}</Typography>
+        <Typography variant="h6">{post.name}</Typography>
         <Typography variant="caption">
           {moment(post.createdAt).fromNow()}
         </Typography>
       </div>
-      <div className={classes.overlay2}>
-        <Button
-          style={{ color: "white" }}
-          onClick={() => setCurrId(post._id)}
-          size="small"
-        >
-          <MoreHorizIcon fontSize="default" />
-        </Button>
-      </div>
+      {(user?.result?._id == post.creator ||
+        user?.result?.googleId === post.creator) && (
+        <div className={classes.overlay2}>
+          <Button
+            style={{ color: "white" }}
+            onClick={() => setCurrId(post._id)}
+            size="small"
+          >
+            <MoreHorizIcon fontSize="default" />
+          </Button>
+        </div>
+      )}
       <div className={classes.details}>
         <Typography variant="body2" color="secondary">
           {rendertag}
@@ -59,19 +92,22 @@ function Post({ post, setCurrId }) {
         <Button
           size="small"
           color="primary"
+          disabled={!user?.result}
           onClick={() => dispatch(likePost(post._id))}
         >
-          <ThumbUpAltIcon fontSize="small" />
-          &nbsp; Like &nbsp;{post.likeCount}
+          <Likes />
         </Button>
-        <Button
-          size="small"
-          color="primary"
-          onClick={() => dispatch(deletePost(post._id))}
-        >
-          <DeleteIcon fontSize="small" />
-          Delete
-        </Button>
+        {(user?.result?._id == post.creator ||
+          user?.result?.googleId === post.creator) && (
+          <Button
+            size="small"
+            color="primary"
+            onClick={() => dispatch(deletePost(post._id))}
+          >
+            <DeleteIcon fontSize="small" />
+            Delete
+          </Button>
+        )}
       </CardActions>
     </Card>
   );
